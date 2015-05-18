@@ -1,0 +1,2 @@
+# OpenMicroMake
+Buildsystem for Microcontrollers
