@@ -6,6 +6,7 @@
  */
 
 #include <OMM_machine_common.h>
+#include <gpio_common.h>
 #include <string.h>
 
 void *OMM_get_pdev_by_name(OMM_machine_t *machine, char *name)

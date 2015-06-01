@@ -13,7 +13,19 @@ $(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST))
 endef
 
 define get_basedir
-$(shell dirname $(call whereami))
+$(dir $(call whereami))
+endef
+
+define get_pre_last_makefile
+$(lastword $(filter-out $(lastword $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))	
+endef
+
+define get_pre_last_makefile_directory
+$(dir $(call get_pre_last_makefile))	
+endef
+
+define rwildcard
+$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 endef
 
 define check_timestamp

@@ -1,16 +1,14 @@
-CCPREFIX	= avr-
-CC   		= $(CCPREFIX)gcc
-CP   		= $(CCPREFIX)objcopy
-ODUMP       = $(CCPREFIX)objdump
-SZ 			= $(CCPREFIX)size
-AS   		= $(CCPREFIX)gcc -x assembler-with-cpp
-RM 			= rm -rf
-MCU  		= atmega8
+#### Generic Part ####
 
-OPTIONAL_CC_FLAGS	= -mmcu=$(MCU) -Os
+ifeq ($(strip $(LOCAL_CONF)),)
+$(info no mach config given...)
+else
+include $(LOCAL_CONF)
+endif
 
-GLOBAL_DEFS = "F_CPU=1000000"
-$(eval DDEFS := $(patsubst %,-D%, $(GLOBAL_DEFS)))
+ifeq ($(strip $(CCPREFIX)),)
+$(error CCPREFIX not defined!)
+endif
 
 ifeq ($(strip $(PROJECT)),)
 $(error PROJECT not defined!)
@@ -30,24 +28,41 @@ include scripts/OMM_config.mk
 include scripts/OMM_functions.mk
 include scripts/OMM_depend.mk
 include scripts/OMM_download.mk
-#include scripts/OMM_package.mk
-
+#include scripts/OMM_package.mk --- Must be included only within package.mk
 include scripts/OMM_global.mk
 
-# include packages here
-include $(call find_mk_files,$(OMM_PACKAGE_DIR))
-include $(call find_mk_files,$(PROJECT))
+# Dynamically include mk files here
+mk_files := $(call find_mk_files,$(OMM_PACKAGE_DIR))
+mk_files += $(call find_mk_files,$(PROJECT))
+$(eval $(call Global/IncludePKG,$(mk_files)))
 
 # Prepare package dependencies
-$(foreach item, $(global_pkg_list),$(eval $(call Global/SetupPkgDeps,$(item))))
+#$(foreach item, $(global_pkg_list),$(eval $(call Global/SetupPkgDeps,$(item))))
+
+#$(eval $(call Package/SwitchSet,omm_common))
+#$(eval $(call Global/ProjectSetup,$(PKG_NAME),$(PKG_DEPS)))
 
 # Prepare include paths
-$(foreach item, $(project_pkg_depends),$(eval $(call Global/SetupIncludePaths,$(item)))$(eval $(call Global/SetupObjList,$(item))))
+#$(foreach item, $(project_pkg_depends), \
+#	$(eval $(call Global/SetupIncludePaths,$(item))) \
+#	$(eval $(call Global/SetupObjList,$(item))) \
+#	$(eval $(call Global/SetupGlobalCompileFlags,$(item))) \
+#)
 
-all: $(global_pkg_prepare_list) $(global_pkg_compile_list) $(project_name).elf
+#$(error $(global_inc_paths))
 
-$(project_name).elf: $(global_objs)
-	$(CC) $(OPTIONAL_CC_FLAGS) $(global_objs) -o $(project_name).elf
+all: $(global_pkg_prepare_list) $(global_pkg_compile_list) $(OMM_PKG_DEPLOY_DIR)/$(project_name).elf
+	
+$(OMM_PKG_DEPLOY_DIR)/$(project_name).elf: $(global_objs)
+	mkdir -p $(OMM_PKG_DEPLOY_DIR)
+	$(CC) $(LD_FLAGS) $(global_objs) -o $(OMM_PKG_DEPLOY_DIR)/$(project_name).elf
+
+#### Generic Part END ####
+
+#arm-none-eabi-objcopy -O binary -S test_project.elf test_project.bin
+
+flash: $(OMM_PKG_DEPLOY_DIR)/$(project_name).hex
+	avrdude -cstk500v2 -P/dev/ttyUSB1 -patmega8 -Uflash:w:$(OMM_PKG_DEPLOY_DIR)/$(project_name).hex
 
 test:
 	@echo global_inc_paths $(global_inc_paths)

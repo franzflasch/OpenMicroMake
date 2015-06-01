@@ -1,7 +1,16 @@
-PKG_NAME := omm_common
-PKG_DEPS := gpio_common
-PKG_SRC := src/OMM_machine_common.c
-PKG_INC := inc
+PKG_NAME := mach_stm32f4_common
+
+ifeq ($(MACH),stm32f40x)
+PKG_SRC := src/OMM_common_stm32.c
+PKG_DEPS := stm32f4lib
+endif
+
+ifeq ($(MACH),stm32f40x_opencm3)
+PKG_SRC := src/OMM_common_stm32_opencm3.c
+PKG_DEPS := libopencm3
+endif
+
+PKG_DEPS += omm_common
 
 include scripts/OMM_package.mk
 

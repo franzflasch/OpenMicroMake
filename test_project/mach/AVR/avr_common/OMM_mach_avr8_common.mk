@@ -1,7 +1,5 @@
-PKG_NAME := omm_common
-PKG_DEPS := gpio_common
-PKG_SRC := src/OMM_machine_common.c
-PKG_INC := inc
+PKG_NAME := mach_avr_common
+PKG_SRC := src/OMM_common_avr.c
 
 include scripts/OMM_package.mk
 

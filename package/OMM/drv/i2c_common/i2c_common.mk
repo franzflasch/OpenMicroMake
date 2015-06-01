@@ -1,6 +1,5 @@
-PKG_NAME := omm_common
-PKG_DEPS := gpio_common
-PKG_SRC := src/OMM_machine_common.c
+PKG_NAME := i2c_common
+PKG_SRC := src/i2c_common.c
 PKG_INC := inc
 
 include scripts/OMM_package.mk
@@ -20,3 +19,4 @@ include scripts/OMM_package.mk
 #endef
 
 $(eval $(call Package/Setup,$(PKG_NAME)))
+

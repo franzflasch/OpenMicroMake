@@ -1,7 +1,7 @@
-PKG_NAME := omm_common
-PKG_DEPS := gpio_common
-PKG_SRC := src/OMM_machine_common.c
-PKG_INC := inc
+PKG_NAME := mach_atmega8
+PKG_SRC := src/OMM_mach_atmega8.c
+PKG_DEPS := omm_common
+PKG_DEPS += gpio_common
 
 include scripts/OMM_package.mk
 

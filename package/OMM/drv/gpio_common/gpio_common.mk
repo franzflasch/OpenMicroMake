@@ -1,6 +1,6 @@
-PKG_NAME := omm_common
-PKG_DEPS := gpio_common
-PKG_SRC := src/OMM_machine_common.c
+PKG_NAME := gpio_common
+PKG_DEPS := i2c_common
+PKG_SRC := src/gpio_common.c
 PKG_INC := inc
 
 include scripts/OMM_package.mk

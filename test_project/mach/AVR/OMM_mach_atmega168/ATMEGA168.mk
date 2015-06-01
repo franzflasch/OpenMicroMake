@@ -1,14 +1,12 @@
-PKG_NAME := omm_common
-PKG_DEPS := gpio_common
-PKG_SRC := src/OMM_machine_common.c
-PKG_INC := inc
+PKG_NAME := mach_atmega168
+PKG_SRC := src/OMM_mach_atmega168.c
 
 include scripts/OMM_package.mk
 
-#define Package/$(PKG_NAME)/Info
+#define Package/Info/$(PKG_NAME)
 #	$(info Package info:)
 #	$(info $(PKG_NAME))
-#	$(info $(PKG_SRC))
+#	$(info $(global_inc_paths))
 #endef
 
 #define Package/Download/$(PKG_NAME)
