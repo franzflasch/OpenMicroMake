@@ -2,6 +2,8 @@ PKG_NAME := i2c_common
 PKG_SRC := src/i2c_common.c
 PKG_INC := inc
 
+PKG_PATCHES := patches/test.patch
+
 include scripts/OMM_package.mk
 
 #define Package/$(PKG_NAME)/Info

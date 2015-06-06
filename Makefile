@@ -36,20 +36,9 @@ mk_files := $(call find_mk_files,$(OMM_PACKAGE_DIR))
 mk_files += $(call find_mk_files,$(PROJECT))
 $(eval $(call Global/IncludePKG,$(mk_files)))
 
+# OLD:
 # Prepare package dependencies
 #$(foreach item, $(global_pkg_list),$(eval $(call Global/SetupPkgDeps,$(item))))
-
-#$(eval $(call Package/SwitchSet,omm_common))
-#$(eval $(call Global/ProjectSetup,$(PKG_NAME),$(PKG_DEPS)))
-
-# Prepare include paths
-#$(foreach item, $(project_pkg_depends), \
-#	$(eval $(call Global/SetupIncludePaths,$(item))) \
-#	$(eval $(call Global/SetupObjList,$(item))) \
-#	$(eval $(call Global/SetupGlobalCompileFlags,$(item))) \
-#)
-
-#$(error $(global_inc_paths))
 
 all: $(global_pkg_prepare_list) $(global_pkg_compile_list) $(OMM_PKG_DEPLOY_DIR)/$(project_name).elf
 	
@@ -65,11 +54,6 @@ flash: $(OMM_PKG_DEPLOY_DIR)/$(project_name).hex
 	avrdude -cstk500v2 -P/dev/ttyUSB1 -patmega8 -Uflash:w:$(OMM_PKG_DEPLOY_DIR)/$(project_name).hex
 
 test:
-	@echo global_inc_paths $(global_inc_paths)
-	@echo global_objs $(global_objs)
-	@echo global_pkg_list $(global_pkg_list)
-	@echo global_dependency_chain $(global_dependency_chain)
-	@echo project_pkg_depends $(project_pkg_depends)
-	@echo project_dep_list $(project_dep_list)
+	@echo test
 
 .PHONY: all test

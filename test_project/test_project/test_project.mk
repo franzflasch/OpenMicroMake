@@ -2,14 +2,9 @@ PKG_NAME := test_project
 
 PKG_DEPS := omm_common
 PKG_DEPS += gpio_common
-#PKG_DEPS += cordic
+PKG_DEPS += cordic
 
 ifeq ($(MACH),stm32f40x)
-PKG_DEPS += mach_stm32f4
-PKG_DEPS += mach_stm32f4_common
-endif
-
-ifeq ($(MACH),stm32f40x_opencm3)
 PKG_DEPS += mach_stm32f4
 PKG_DEPS += mach_stm32f4_common
 endif

@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <OMM_machine_common.h>
 #include <gpio_common.h>
-//#include <cordic.h>
+#include <cordic.h>
 
 int __attribute__((weak)) main (void)
 {
@@ -12,9 +12,9 @@ int __attribute__((weak)) main (void)
 
 	gpio = OMM_get_pdev_by_name(machine, "gpio_0");
 
-	//int sin;
-	//int cos;
-	//cordic_sincos(3, 10, &sin, &cos);
+	int sin;
+	int cos;
+	cordic_sincos(3, 10, &sin, &cos);
 
     while (1)
     {

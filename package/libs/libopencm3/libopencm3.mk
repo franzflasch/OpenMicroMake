@@ -5,11 +5,15 @@ PKG_INC := libopencm3-master/include/
 include scripts/OMM_package.mk
 
 define Package/Compile/$(PKG_NAME)
-$(eval retval := $(shell cd $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/libopencm3-master; $(MAKE) > /dev/null; echo $$?)) \
-$(if $(call strequal,$(retval),0),, \
-	$(error Compiling of $(PKG_NAME) failed! retval $(retval)) \
-)
+$(MAKE) -C $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/libopencm3-master
 endef
+
+#define Package/Compile/$(PKG_NAME)
+#$(eval retval := $(shell cd $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/libopencm3-master; $(MAKE) > /dev/null; echo $$?)) \
+#$(if $(call strequal,$(retval),0),, \
+#	$(error Compiling of $(PKG_NAME) failed! retval $(retval)) \
+#)
+#endef
 
 define Package/BeforeLink/$(PKG_NAME)
 	$(eval LINKLIBS := opencm3_stm32f4)

@@ -1,11 +1,11 @@
 PKG_NAME := mach_stm32f4
 
-ifeq ($(MACH),stm32f40x)
+ifeq ($(UCLIB),st_library)
 PKG_DEPS := stm32f4lib
 PKG_SRC := src/OMM_mach_stm32f4.c
 endif
 
-ifeq ($(MACH),stm32f40x_opencm3)
+ifeq ($(UCLIB),libopencm3)
 PKG_DEPS := libopencm3
 PKG_SRC := src/OMM_mach_stm32f4_opencm3.c
 endif

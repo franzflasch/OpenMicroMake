@@ -7,6 +7,7 @@ define Package/SwitchSet
 	$(eval PKG_INC:=$($(1)/PKG_INC))
 	$(eval PKG_DEFS:=$($(1)/PKG_DEFS))
 	$(eval PKG_CC_FLAGS:=$($(1)/PKG_CC_FLAGS))
+	$(eval PKG_PATCHES:=$($(1)/PKG_PATCHES))
 	$(eval PKG_BASEDIR:=$($(1)/PKG_BASEDIR))
 endef
 
@@ -19,6 +20,7 @@ define Package/Setup
 	$(eval $(1)/PKG_INC := $(PKG_INC))
 	$(eval $(1)/PKG_DEFS := $(PKG_DEFS))
 	$(eval $(1)/PKG_CC_FLAGS := $(PKG_CC_FLAGS))
+	$(eval $(1)/PKG_PATCHES := $(PKG_PATCHES))
 	$(eval $(1)/PKG_BASEDIR := $(PKG_BASEDIR))
 	$(eval $(call Global/AddGlobalPackageList,$(PKG_NAME)))
 endef
@@ -33,10 +35,6 @@ $(foreach item, $(PKG_DEPS), \
 $(eval $(call Package/SwitchSet,$(1))) \
 $(eval pkg_inc_paths += $(patsubst %,$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/%,$(PKG_INC)))
 endef
-
-#$(eval $(call Global/SetupIncludePaths,$(PKG_NAME)))
-#$(eval $(call Global/SetupObjList,$(item)))
-#$(eval $(call Global/SetupGlobalCompileFlags,$(item)))
 
 #define Package/Info/$(PKG_NAME)
 #	$(info Package info:)
@@ -56,7 +54,7 @@ endef
 define Package/Download/$(PKG_NAME)
 	$(if $(call strequal,$(PKG_URI),local), \
 		$(info Local PKG: $(PKG_NAME)) \
-		,
+		, \
 		$(if $(strip $(PKG_URI)), \
 			$(info Hey there is a PKG_URI for package $(PKG_NAME) - $(PKG_URI)) \
 			$(info Using default method) \
@@ -82,69 +80,75 @@ define Package/Unpack/$(PKG_NAME)
 	)
 endef
 
-#$(eval $(shell cd $(OMM_PKG_WORK_DIR)/$(PKG_NAME); ))
+#quilt import $(tmp_patches)\ 
+#quilt push -a\
+#cd $(tmp_omm_basedir)\
 
 define Package/Patch/$(PKG_NAME)
-	$(eval $(info hey i am the patch function!!!))
+	$(if $(strip $(PKG_PATCHES)), \
+		$(eval tmp_omm_basedir:=$(PWD)) \
+		$(eval tmp_patches:=$(patsubst %,$(tmp_omm_basedir)/$(PKG_BASEDIR)%,$(PKG_PATCHES))) \
+		cd $(OMM_PKG_WORK_DIR)/$(PKG_NAME); \
+		quilt import $(tmp_patches); \
+		quilt push -a; \
+		cd $(tmp_omm_basedir); \
+		$(info $(tmp_patches)) \
+		, \
+		$(info No PKG_PATCHES for $(PKG_NAME)) \
+	)
 endef
 
 define Package/Compile/$(PKG_NAME)
 $(eval tmp_inc_paths := $(patsubst %,-I%, $(pkg_inc_paths)))
 $(eval tmp_defs := $(patsubst %,-D%, $(PKG_DEFS)))
 $(foreach item,$(cur_src), \
-	$(info $(CC) $(CC_FLAGS) $(PKG_CC_FLAGS) $(global_defines) $(tmp_defs) $(tmp_inc_paths) -c $(item) -o $(item:.c=.o ))
-	$(eval retval := $(shell $(CC) $(CC_FLAGS) $(PKG_CC_FLAGS) $(global_defines) $(tmp_defs) $(tmp_inc_paths) -c $(item) -o $(item:.c=.o ); echo $$?)) \
-	$(if $(call strequal,$(retval),0),, \
-		$(error Compiling of $(item) failed! retval $(retval)) \
-	) \
+	$(CC) $(CC_FLAGS) $(PKG_CC_FLAGS) $(global_defines) $(tmp_defs) $(tmp_inc_paths) -c $(item) -o $(item:.c=.o ); \
 ) \
 $(foreach item,$(cur_asm_src), \
-	$(eval retval := $(shell $(AS) $(AS_FLAGS) -c $(item) -o $(item:.s=.o ); echo $$?)) \
-	$(if $(call strequal,$(retval),0),, \
-		$(error Compiling of $(item) failed! retval $(retval)) \
-	) \
+	$(AS) $(AS_FLAGS) -c $(item) -o $(item:.s=.o ); \
 )
 endef
 
-pkg_prepare_depends:=$(patsubst %,$(OMM_PKG_WORK_DIR)/%/prepare,$(PKG_DEPS))
-pkg_compile_depends:=$(patsubst %,$(OMM_PKG_WORK_DIR)/%/compile,$(PKG_DEPS))
-
 $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download:
-	$(eval $(call Package/SwitchSet,$(notdir $(@D))))
-	$(eval $(call Package/Download/$(PKG_NAME)))
-	$(eval $(call set_timestamp,$(OMM_PKG_WORK_DIR)/$(PKG_NAME),download))
+	$(call Package/SwitchSet,$(notdir $(@D)))
+	$(call Package/Download/$(PKG_NAME))
+	$(call set_timestamp,$(OMM_PKG_WORK_DIR)/$(PKG_NAME),download)
 	@echo $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download done
 
-$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare: $(pkg_prepare_depends) $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download $(call rwildcard, $(PKG_BASEDIR)/, *.c *.h *.mk)
-	$(eval $(call Package/SwitchSet,$(notdir $(@D))))
-	$(eval $(call Package/Info/$(PKG_NAME)))
-	$(eval $(call Package/Unpack/$(PKG_NAME)))
-	$(eval $(call Package/Patch/$(PKG_NAME)))
-	$(eval $(call set_timestamp,$(OMM_PKG_WORK_DIR)/$(PKG_NAME),prepare))
+$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download $(call rwildcard, $(PKG_BASEDIR)/, *.c *.h *.mk)
+	$(call Package/SwitchSet,$(notdir $(@D)))
+	$(call Package/Info/$(PKG_NAME))
+	$(call Package/Unpack/$(PKG_NAME))
+	$(call Package/Patch/$(PKG_NAME))
+	$(call set_timestamp,$(OMM_PKG_WORK_DIR)/$(PKG_NAME),prepare)
 	@echo $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare done
 
 $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/compile: $(pkg_compile_depends) $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare $(cur_src)
-	$(eval $(call Package/SwitchSet,$(notdir $(@D))))
-	$(eval $(call Package/SetupPkgIncPaths,$(PKG_NAME)))
-	$(eval $(info compiling $(PKG_NAME)))
-	$(eval $(info pkg_inc_paths $(pkg_inc_paths)))
-	$(eval $(call Package/Compile/$(PKG_NAME)))
-	$(eval $(call Global/WritePkgBuildProgress,$(PKG_NAME),$(OMM_PKG_WORK_DIR)/pkgs_built))
-	$(eval $(call set_timestamp,$(OMM_PKG_WORK_DIR)/$(PKG_NAME),compile))
+	$(call Package/SwitchSet,$(notdir $(@D)))
+	$(call Package/SetupPkgIncPaths,$(PKG_NAME))
+	$(info compiling $(PKG_NAME))
+	$(info pkg_inc_paths $(pkg_inc_paths))
+	$(call Package/Compile/$(PKG_NAME))
+	$(call Global/WritePkgBuildProgress,$(PKG_NAME),$(OMM_PKG_WORK_DIR)/pkgs_built)
+	$(call set_timestamp,$(OMM_PKG_WORK_DIR)/$(PKG_NAME),compile)
 	@echo $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/compile done
 
-$(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).elf: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/compile
+$(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/compile
+	$(call Package/SwitchSet,$(notdir $(@D)))
 	mkdir -p $(OMM_PKG_DEPLOY_DIR)
-	$(eval objs_so_far:=$(call Global/ReadPkgBuildProgress,$(OMM_PKG_WORK_DIR)/pkgs_built))
-	$(foreach item,$(objs_so_far),$(call Package/SwitchSet,$(item))$(call Package/BeforeLink/$(item)))
-	$(eval $(call Global/SetupObjList,$(objs_so_far)))
+	$(eval objs_to_link:=$(call Global/SetupAndGetPkgDeps,$(PKG_NAME),$(PKG_DEPS)))
+	$(eval objs_to_link+=$(PKG_NAME))
+	$(foreach item,$(objs_to_link),$(call Package/SwitchSet,$(item))$(call Package/BeforeLink/$(item)))
+	$(call Global/SetupObjList,$(objs_to_link))
 	$(CC) $(global_objs) $(LD_FLAGS) -o $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).elf
-	@echo objs_so_far: $(objs_so_far)
+	$(call set_timestamp,$(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME),link)
+	@echo $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link done
+	@echo Packages linked: $(objs_to_link)
 
-$(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).bin: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).elf
+$(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).bin: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link
 	$(CP) -O binary -S $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).elf $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).bin
 	
-$(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).hex: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).elf
+$(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).hex: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link
 	$(CP) -R .eeprom -R .fuse -R .lock -R .signature -O ihex $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).elf $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).hex
 
 $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/clean:
@@ -160,7 +164,7 @@ $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/dirclean:
 $(PKG_NAME)/download: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download
 $(PKG_NAME)/prepare: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare
 $(PKG_NAME)/compile: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/compile
-$(PKG_NAME)/link: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).elf
+$(PKG_NAME)/link: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link
 $(PKG_NAME)/bin: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).bin
 $(PKG_NAME)/hex: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).hex
 $(PKG_NAME)/clean: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/clean
