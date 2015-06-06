@@ -1,0 +1,12 @@
+Index: i2c_common/src/i2c_common.c
+===================================================================
+--- i2c_common.orig/src/i2c_common.c
++++ i2c_common/src/i2c_common.c
+@@ -7,6 +7,7 @@
+ 
+ #include <i2c_common.h>
+ 
++/* this is just a blabla test comment */
+ void I2C_init_master(i2c_master_t *master,
+ 					 void *i2c_trans_byte,
+ 					 void *i2c_rec_byte,
