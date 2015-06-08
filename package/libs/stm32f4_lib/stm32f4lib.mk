@@ -55,7 +55,7 @@ PKG_INC += STM32F4xx_DSP_StdPeriph_Lib_V1.5.1/Project/STM32F4xx_StdPeriph_Templa
 PKG_DEFS := USE_STDPERIPH_DRIVER
 
 
-include scripts/OMM_package.mk
+include scripts/OMM_package_rules.mk
 
 define Package/BeforeLink/$(PKG_NAME)
 	$(eval LINKERSCRIPT := $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/STM32F4xx_DSP_StdPeriph_Lib_V1.5.1/Project/STM32F4xx_StdPeriph_Templates/TrueSTUDIO/STM32F40_41xxx/STM32F417IG_FLASH.ld)

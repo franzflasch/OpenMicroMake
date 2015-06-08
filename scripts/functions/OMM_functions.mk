@@ -36,3 +36,7 @@ define set_timestamp
 $(shell mkdir -p $(1)) \
 $(shell touch $(1)/$(2))
 endef
+
+define newline
+
+endef

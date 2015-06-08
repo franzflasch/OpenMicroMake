@@ -1,7 +1,7 @@
 PKG_NAME := mach_stm32f1_common
 PKG_SRC := src/OMM_common_stm32.c
 
-include scripts/OMM_package.mk
+include scripts/OMM_package_rules.mk
 
 #define Package/$(PKG_NAME)/Info
 #	$(info Package info:)

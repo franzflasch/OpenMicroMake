@@ -39,7 +39,7 @@ PKG_INC += STM32F10x_StdPeriph_Lib_V3.5.0/Project/STM32F10x_StdPeriph_Template/
 # Used defines for this project
 PKG_DEFS = USE_STDPERIPH_DRIVER
 
-include scripts/OMM_package.mk
+include scripts/OMM_package_rules.mk
 
 #define Package/$(PKG_NAME)/Info
 #	$(info Package info:)

@@ -3,7 +3,7 @@ PKG_DEPS := gpio_common
 PKG_SRC := src/OMM_machine_common.c
 PKG_INC := inc
 
-include scripts/OMM_package.mk
+include scripts/OMM_package_rules.mk
 
 #define Package/$(PKG_NAME)/Info
 #	$(info Package info:)

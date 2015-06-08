@@ -1,7 +1,7 @@
 PKG_NAME := mach_atmega168
 PKG_SRC := src/OMM_mach_atmega168.c
 
-include scripts/OMM_package.mk
+include scripts/OMM_package_rules.mk
 
 #define Package/Info/$(PKG_NAME)
 #	$(info Package info:)

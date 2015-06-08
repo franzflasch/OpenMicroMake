@@ -12,7 +12,7 @@ endif
 
 PKG_DEPS += omm_common
 
-include scripts/OMM_package.mk
+include scripts/OMM_package_rules.mk
 
 #define Package/$(PKG_NAME)/Info
 #	$(info Package info:)

@@ -21,6 +21,6 @@ int __attribute__((weak)) main (void)
     	gpio_val ^= 1 << 0;
     	GPIO_set(gpio, 0, gpio_val);
     	GPIO_set(gpio, 1, !gpio_val);
-    	OMM_busy_delay(5500);
+    	OMM_busy_delay(500);
     }
 }

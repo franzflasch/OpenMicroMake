@@ -4,7 +4,7 @@ PKG_INC := inc
 
 PKG_PATCHES := patches/test.patch
 
-include scripts/OMM_package.mk
+include scripts/OMM_package_rules.mk
 
 #define Package/$(PKG_NAME)/Info
 #	$(info Package info:)

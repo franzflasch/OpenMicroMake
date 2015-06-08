@@ -6,7 +6,7 @@ PKG_INC := MSP430-CORDIC-sine-cosine-master/
 
 # Very important to include this after all PKG_ vars are set. This will setup specific package rules which
 # will be called when building.
-include scripts/OMM_package.mk
+include scripts/OMM_package_rules.mk
 
 # It is possible to overide the default build functions here - this is probably not really needed.
 
