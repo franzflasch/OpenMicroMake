@@ -20,7 +20,6 @@ $(strip \
 endef
 
 define DownloadMethod/do_nothing
-$(info Local Package $(notdir $(1)))
 endef
 
 define DownloadMethod/git
@@ -28,9 +27,6 @@ git clone $2 $3
 endef
 
 define DownloadMethod/default
-$(shell mkdir --parents $(1)) \
-$(eval retval := $(shell wget -nc -P $1 $2; echo $$?)) \
-$(if $(call strequal,$(retval),0),, \
-	$(error download of $1 failed! retval $(retval)) \
-)
+$(call shell_with_exit_status,mkdir --parents $(1),$(VERBOSE_OUTPUT)) \
+$(call shell_with_exit_status,wget -nc -P $1 $2,$(VERBOSE_OUTPUT))
 endef

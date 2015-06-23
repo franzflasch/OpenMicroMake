@@ -1,15 +1,7 @@
-ifeq ($(strip $(PROJ_CONF)),)
+ifeq ($(strip $(PROJECT)),)
 $(error no project config given...)
 else
-include $(PROJ_CONF)
-endif
-
-ifeq ($(strip $(CCPREFIX)),)
-$(error CCPREFIX not defined!)
-endif
-
-ifeq ($(strip $(PROJECT)),)
-$(error PROJECT not defined!)
+include $(PROJECT)
 endif
 
 ifeq ($(strip $(ARCH)),)
@@ -20,6 +12,15 @@ ifeq ($(strip $(MACH)),)
 $(error MACH not defined!)
 endif
 
+ifeq ($(strip $(CCPREFIX)),)
+$(error CCPREFIX not defined!)
+endif
+
+PROJECT_NAME=$(basename $(notdir $(PROJECT)))
+PROJECT_PATH=$(dir $(PROJECT))
+
+VERBOSE_OUTPUT := 1
+
 include scripts/OMM_config.mk
 include scripts/functions/OMM_functions.mk
 include scripts/OMM_package_generic.mk
@@ -27,14 +28,14 @@ include scripts/OMM_package_generic.mk
 
 # Dynamically include mk files here
 mk_files := $(call find_mk_files,$(OMM_PACKAGE_DIR))
-mk_files += $(call find_mk_files,$(PROJECT))
+mk_files += $(call find_mk_files,$(PROJECT_PATH))
 $(eval $(call Package/IncludePKG,$(mk_files)))
 
 
-flash: $(OMM_PKG_DEPLOY_DIR)/$(project_name).hex
-	avrdude -cstk500v2 -P/dev/ttyUSB1 -patmega8 -Uflash:w:$(OMM_PKG_DEPLOY_DIR)/$(project_name).hex
+flash: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).hex
+	avrdude -cstk500v2 -P/dev/ttyUSB0 -patmega8 -Uflash:w:$(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).hex
 
 test:
 	@echo test
 
-.PHONY: all test
+.PHONY: all test flash

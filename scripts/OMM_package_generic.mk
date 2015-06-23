@@ -56,43 +56,38 @@ define Package/Setup
 endef
 
 define Package/SetupPkgDeps
-	$(foreach item, $(2), \
-		$(eval $(call Package/SwitchSet,$(item))) \
-		$(eval global_dependency_chain += :-$(PKG_NAME) $(PKG_DEPS) -:) \
-	) \
-	$(eval $(call Package/SwitchSet,$(1)))
-endef
-
-define Package/GetPkgDeps
-	$(eval global_resolved_dep_list:=) \
-	$(eval dep_list:=$(1)) \
-	$(eval pkg_depends:=$(call resolve_deps,dep_list,global_resolved_dep_list,global_dependency_chain)) \
-	$(pkg_depends)
+	$(foreach item, $(2),
+		$(call Package/SwitchSet,$(item))
+		$(eval global_dependency_chain += :-$(PKG_NAME) $(PKG_DEPS) -:)
+	)
+	$(call Package/SwitchSet,$(1))
 endef
 
 define Package/SetupAndGetPkgDeps
-	$(call Package/SetupPkgDeps,$(1),$(global_pkg_list)) \
-	$(call Package/GetPkgDeps,$(2))
+	$(call Package/SetupPkgDeps,$(2),$(global_pkg_list))
+	$(eval global_resolved_dep_list:=)
+	$(eval dep_list:=$(3))
+	$(eval $(1):=$(call resolve_deps,dep_list,global_resolved_dep_list,global_dependency_chain))
 endef
 
 define Package/SetupObjList
-	$(eval global_objs :=) \
-	$(foreach item, $(2), \
-		$(eval $(call Package/SwitchSet,$(item))) \
-		$(eval global_objs += $(cur_objs)) \
-		$(eval global_objs = $(sort $(global_objs))) \
-	) \
-	$(eval $(call Package/SwitchSet,$(1)))
+	$(eval global_objs:=)
+	$(foreach item, $(2),
+		$(call Package/SwitchSet,$(item))
+		$(eval global_objs+=$(cur_objs))
+		$(eval global_objs=$(sort $(global_objs)))
+	)
+	$(call Package/SwitchSet,$(1))
 endef
 
 define Package/SetupPkgIncPaths
-	$(eval pkg_inc_paths :=) \
-	$(foreach item, $(PKG_DEPS), \
-		$(eval $(call Package/SwitchSet,$(item))) \
-		$(eval pkg_inc_paths += $(patsubst %,$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/%,$(PKG_INC))) \
-		$(eval pkg_inc_paths = $(sort $(pkg_inc_paths))) \
-	) \
-	$(eval $(call Package/SwitchSet,$(1))) \
+	$(eval pkg_inc_paths :=)
+	$(foreach item, $(PKG_DEPS),
+		$(call Package/SwitchSet,$(item))
+		$(eval pkg_inc_paths += $(patsubst %,$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/%,$(PKG_INC)))
+		$(eval pkg_inc_paths = $(sort $(pkg_inc_paths)))
+	)
+	$(call Package/SwitchSet,$(1))
 	$(eval pkg_inc_paths += $(patsubst %,$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/%,$(PKG_INC)))
 endef
 

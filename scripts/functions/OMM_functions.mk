@@ -40,3 +40,13 @@ endef
 define newline
 
 endef
+
+# shell_with_exit_status
+# params: 	$1: shell program to call
+# 			$2: debug 1, 0
+define shell_with_exit_status
+$(if $(strip $(3)),$(error no option to redirect!)) \
+$(if $(call strequal,$(2),1),$(info $(1))$(eval retval := $(shell $(1); echo $$?)), \
+$(eval retval := $(shell $(1) 2> /dev/null; echo $$?))) \
+$(if $(call strequal,$(retval),0),,$(error $(1) failed! retval $(retval)))
+endef

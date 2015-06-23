@@ -10,7 +10,7 @@ define Package/Download/$(PKG_NAME)
 	$(if $(strip $(PKG_URI)), \
 		$(call DownloadMethod/$(call dl_method,$(PKG_URI)),$(OMM_DOWNLOAD_DIR)/$(PKG_NAME),$(PKG_URI)) \
 		, \
-		$(info No PKG_URI for $(PKG_NAME)) \
+		$(error No PKG_URI for $(PKG_NAME)) \
 	)
 endef
 
@@ -18,7 +18,7 @@ define Package/Unpack/$(PKG_NAME)
 	$(if $(strip $(PKG_URI)), \
 		$(call UnpackMethod/$(call unpack_method,$(notdir $(PKG_URI))),$(OMM_PKG_WORK_DIR)/$(PKG_NAME),$(OMM_DOWNLOAD_DIR)/$(PKG_NAME)/$(notdir $(PKG_URI)),$(PKG_BASEDIR)) \
 		, \
-		$(info No PKG_URI for $(PKG_NAME)) \
+		$(error No PKG_URI for $(PKG_NAME)) \
 	)
 endef
 
@@ -32,7 +32,6 @@ define Package/Patch/$(PKG_NAME)
 		cd $(tmp_omm_basedir); \
 		$(info $(tmp_patches)) \
 		, \
-		$(info No PKG_PATCHES for $(PKG_NAME)) \
 	)
 endef
 
@@ -52,27 +51,34 @@ endef
 #endef
 
 define Package/Compile/$(PKG_NAME)
-	$(eval tmp_inc_paths := $(patsubst %,-I%, $(pkg_inc_paths))) \
-	$(eval tmp_defs := $(patsubst %,-D%, $(PKG_DEFS))) \
-	$(foreach item,$(cur_src), \
-		$(CC) $(CC_FLAGS) $(PKG_CC_FLAGS) $(global_defines) $(tmp_defs) $(tmp_inc_paths) -c $(item) -o $(item:.c=.o ); \
-		$(newline) \
-	) \
-	$(foreach item,$(cur_asm_src), \
-		$(AS) $(AS_FLAGS) -c $(item) -o $(item:.s=.o ); \
+	$(eval tmp_inc_paths := $(patsubst %,-I%, $(pkg_inc_paths)))
+	$(eval tmp_defs := $(patsubst %,-D%, $(PKG_DEFS)))
+	$(foreach item,$(cur_src),
+		$(call shell_with_exit_status,$(CC) $(CC_FLAGS) $(PKG_CC_FLAGS) $(global_defines) $(tmp_defs) $(tmp_inc_paths) -c $(item) -o $(item:.c=.o ),$(VERBOSE_OUTPUT))
+	)
+	$(foreach item,$(cur_asm_src),
+		$(call shell_with_exit_status,$(AS) $(AS_FLAGS) -c $(item) -o $(item:.s=.o ),$(VERBOSE_OUTPUT))
 	)
 endef
 
 define Package/Link/$(PKG_NAME)
-	$(eval tmp_cur_pkg_name:=$(PKG_NAME)) \
-	mkdir -p $(OMM_PKG_DEPLOY_DIR) \
-	$(eval objs_to_link:=$(call Package/SetupAndGetPkgDeps,$(PKG_NAME),$(PKG_DEPS))) \
-	$(eval objs_to_link+=$(PKG_NAME)) \
-	$(foreach item,$(objs_to_link), \
-		$(call Package/SwitchSet,$(item)) \
-		$(call Package/BeforeLink/$(item)) \
-	) \
-	$(call Package/SwitchSet,$(tmp_cur_pkg_name)) \
-	$(call Package/SetupObjList,$(PKG_NAME),$(objs_to_link)) \
-	$(CC) $(global_objs) $(LD_FLAGS) -o $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).elf
+	$(eval tmp_cur_pkg_name:=$(PKG_NAME))
+	$(call Package/SetupAndGetPkgDeps,objs_to_link,$(PKG_NAME),$(PKG_DEPS))
+	$(eval objs_to_link+=$(PKG_NAME))
+	$(foreach item,$(objs_to_link),$(call Package/SwitchSet,$(item))
+		$(call Package/BeforeLink/$(item))
+	)
+	$(call Package/SwitchSet,$(tmp_cur_pkg_name))
+	$(call Package/SetupObjList,$(PKG_NAME),$(objs_to_link))
+	$(call shell_with_exit_status,mkdir -p $(OMM_PKG_DEPLOY_DIR),$(VERBOSE_OUTPUT))
+	$(call shell_with_exit_status,$(CC) $(global_objs) $(LD_FLAGS) -o $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).elf,$(VERBOSE_OUTPUT))
+	$(SZ) $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).elf
+endef
+
+define Package/Clean/$(PKG_NAME)
+	rm -rf $(cur_objs)
+endef
+
+define Package/Dirclean/$(PKG_NAME)
+	rm -rf $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/
 endef

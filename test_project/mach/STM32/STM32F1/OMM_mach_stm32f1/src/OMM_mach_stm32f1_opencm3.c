@@ -5,24 +5,27 @@
  *      Author: fflasch
  */
 
-#include <stm32f10x.h>
-#include <stm32f10x_conf.h>
-
 #include <stdlib.h>
 #include <OMM_machine_common.h>
+#include <libopencm3/stm32/rcc.h>
+#include <libopencm3/stm32/gpio.h>
 
 #include <gpio_common.h>
 
+/* Set STM32 to 24 MHz. */
+static void MACH_STM32F1_clock_setup(void)
+{
+	rcc_clock_setup_in_hse_8mhz_out_24mhz();
+}
+
 static void MACH_STM32F1_gpio_setup(void)
 {
-	GPIO_InitTypeDef GPIO_InitStructure;
+	/* Enable GPIOC clock. */
+	rcc_periph_clock_enable(RCC_GPIOC);
 
-	/* GPIOC clock enable */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_8;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	/* Set GPIO8/9 (in GPIO port C) to 'output push-pull'. */
+	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, GPIO8);
+	gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, GPIO9);
 }
 
 static void set_gpio(uint8_t pin, uint8_t val)
@@ -31,9 +34,15 @@ static void set_gpio(uint8_t pin, uint8_t val)
 	{
 		case 0:
 			if(val == GPIO_COMMON_HIGH)
-				GPIO_SetBits(GPIOC, GPIO_Pin_8);
+				gpio_set(GPIOC, GPIO8);
 			else if (val == GPIO_COMMON_LOW)
-				GPIO_ResetBits(GPIOC, GPIO_Pin_8);
+				gpio_clear(GPIOC, GPIO8);
+			break;
+		case 1:
+			if(val == GPIO_COMMON_HIGH)
+				gpio_set(GPIOC, GPIO9);
+			else if (val == GPIO_COMMON_LOW)
+				gpio_clear(GPIOC, GPIO9);
 			break;
 		default:
 			break;
@@ -55,6 +64,7 @@ static void MACH_STM32F1_gpio_set(gpio_controller_t *gpio, uint8_t pin, uint8_t 
 	}
 }
 
+
 OMM_machine_t __attribute__((weak)) *machine_setup(void)
 {
 	static OMM_machine_t machine =
@@ -69,6 +79,7 @@ OMM_machine_t __attribute__((weak)) *machine_setup(void)
 			{NULL, NULL}
 	};
 
+	MACH_STM32F1_clock_setup();
 	MACH_STM32F1_gpio_setup();
 	GPIO_init_controller(&gpio, ACTIVE_HIGH, 1, MACH_STM32F1_gpio_set, NULL);
 
@@ -76,3 +87,4 @@ OMM_machine_t __attribute__((weak)) *machine_setup(void)
 
 	return &machine;
 }
+

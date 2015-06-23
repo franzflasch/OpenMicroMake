@@ -4,15 +4,15 @@ $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download:
 	$(call Package/SwitchSet,$(notdir $(@D)))
 	$(call Package/Download/$(PKG_NAME))
 	$(call set_timestamp,$(OMM_PKG_WORK_DIR)/$(PKG_NAME),download)
-	@echo $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download done
+	@echo [OMM_RULE] $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download done
 
-$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download $(call rwildcard, $(PKG_BASEDIR)/, *.c *.h *.mk)
+$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download $(call rwildcard, $(PKG_BASEDIR)/, *.c *.h)
 	$(call Package/SwitchSet,$(notdir $(@D)))
 	$(call Package/Info/$(PKG_NAME))
 	$(call Package/Unpack/$(PKG_NAME))
 	$(call Package/Patch/$(PKG_NAME))
 	$(call set_timestamp,$(OMM_PKG_WORK_DIR)/$(PKG_NAME),prepare)
-	@echo $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare done
+	@echo [OMM_RULE] $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare done
 
 $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/compile: $(pkg_compile_depends) $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare $(cur_src)
 	$(call Package/SwitchSet,$(notdir $(@D)))
@@ -20,13 +20,13 @@ $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/compile: $(pkg_compile_depends) $(OMM_PKG_WORK_D
 	$(call Package/Compile/$(PKG_NAME))
 	$(call Package/WritePkgBuildProgress,$(PKG_NAME),$(OMM_PKG_WORK_DIR)/pkgs_built)
 	$(call set_timestamp,$(OMM_PKG_WORK_DIR)/$(PKG_NAME),compile)
-	@echo $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/compile done
+	@echo [OMM_RULE] $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/compile done
 
 $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/compile
 	$(call Package/SwitchSet,$(notdir $(@D)))
 	$(call Package/Link/$(PKG_NAME))
 	$(call set_timestamp,$(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME),link)
-	@echo $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link done
+	@echo $[OMM_RULE] $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link done
 
 $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).bin: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link
 	$(CP) -O binary -S $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).elf $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).bin
@@ -35,13 +35,13 @@ $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).hex: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link
 	$(CP) -R .eeprom -R .fuse -R .lock -R .signature -O ihex $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).elf $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).hex
 
 $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/clean:
-	$(eval $(call Package/SwitchSet,$(notdir $(@D))))
+	$(call Package/SwitchSet,$(notdir $(@D)))
 	rm -rf $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/compile
-	rm -rf $(cur_objs)
+	$(call Package/Clean/$(PKG_NAME))
 
 $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/dirclean:
-	$(eval $(call Package/SwitchSet,$(notdir $(@D))))
-	rm -rf $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/
+	$(call Package/SwitchSet,$(notdir $(@D)))
+	$(call Package/Dirclean/$(PKG_NAME))
 
 #### Shortcut rules:
 $(PKG_NAME)/download: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download

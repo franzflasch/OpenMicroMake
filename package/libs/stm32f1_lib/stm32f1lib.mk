@@ -41,18 +41,9 @@ PKG_DEFS = USE_STDPERIPH_DRIVER
 
 include scripts/OMM_package_rules.mk
 
-#define Package/$(PKG_NAME)/Info
-#	$(info Package info:)
-#	$(info $(PKG_NAME))
-#	$(info $(PKG_SRC))
-#endef
-
-#define Package/Download/$(PKG_NAME)
-#	$(info Hey I am overriding the default download method!:)
-#endef
-
-#define Package/Build/$(PKG_NAME)
-#	$(info overiding default $(PKG_NAME) build)
-#endef
+define Package/BeforeLink/$(PKG_NAME)
+	$(eval LINKERSCRIPT := $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/STM32F10x_StdPeriph_Lib_V3.5.0/Project/STM32F10x_StdPeriph_Template/TrueSTUDIO/STM32100B-EVAL/stm32_flash.ld)
+	$(eval LD_FLAGS += -T$(LINKERSCRIPT))
+endef
 
 $(eval $(call Package/Setup,$(PKG_NAME)))

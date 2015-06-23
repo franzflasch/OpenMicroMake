@@ -10,11 +10,9 @@ $(strip \
 endef
 
 define UnpackMethod/unzip
-$(shell mkdir --parents $(1)) \
-$(eval retval := $(shell unzip -d $1 $2 > /dev/null; echo $$?)) \
-$(if $(call strequal,$(retval),0),, \
-	$(error unzip of $2 failed! retval $(retval)) \
-)
+$(call shell_with_exit_status,mkdir -p $(1),$(VERBOSE_OUTPUT)) \
+$(call shell_with_exit_status,cp -rf $(3)/* $(1),$(VERBOSE_OUTPUT)) \
+$(call shell_with_exit_status,unzip -d $1 $2 > /dev/null,$(VERBOSE_OUTPUT))
 endef
 
 define UnpackMethod/copy
