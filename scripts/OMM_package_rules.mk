@@ -6,7 +6,7 @@ $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download:
 	$(call set_timestamp,$(OMM_PKG_WORK_DIR)/$(PKG_NAME),download)
 	@echo [OMM_RULE] $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download done
 
-$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download $(call rwildcard, $(PKG_BASEDIR)/, *.c *.h)
+$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download $(call rwildcard, $(PKG_BASEDIR)/, *.s *.c *.cpp *.h)
 	$(call Package/SwitchSet,$(notdir $(@D)))
 	$(call Package/Info/$(PKG_NAME))
 	$(call Package/Unpack/$(PKG_NAME))

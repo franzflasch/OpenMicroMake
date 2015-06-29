@@ -4,7 +4,6 @@ include scripts/functions/OMM_download.mk
 include scripts/functions/OMM_unpack.mk
 
 ### Functions for building packages: ###
-#define Package/Download/$(PKG_NAME)
 
 define Package/Download/$(PKG_NAME)
 	$(if $(strip $(PKG_URI)), \
@@ -56,6 +55,9 @@ define Package/Compile/$(PKG_NAME)
 	$(foreach item,$(cur_src),
 		$(call shell_with_exit_status,$(CC) $(CC_FLAGS) $(PKG_CC_FLAGS) $(global_defines) $(tmp_defs) $(tmp_inc_paths) -c $(item) -o $(item:.c=.o ),$(VERBOSE_OUTPUT))
 	)
+	$(foreach item,$(cur_src_cpp),
+		$(call shell_with_exit_status,$(CPP) $(CPP_FLAGS) $(PKG_CC_FLAGS) $(global_defines) $(tmp_defs) $(tmp_inc_paths) -c $(item) -o $(item:.cpp=.o ),$(VERBOSE_OUTPUT))
+	)
 	$(foreach item,$(cur_asm_src),
 		$(call shell_with_exit_status,$(AS) $(AS_FLAGS) -c $(item) -o $(item:.s=.o ),$(VERBOSE_OUTPUT))
 	)
@@ -65,7 +67,8 @@ define Package/Link/$(PKG_NAME)
 	$(eval tmp_cur_pkg_name:=$(PKG_NAME))
 	$(call Package/SetupAndGetPkgDeps,objs_to_link,$(PKG_NAME),$(PKG_DEPS))
 	$(eval objs_to_link+=$(PKG_NAME))
-	$(foreach item,$(objs_to_link),$(call Package/SwitchSet,$(item))
+	$(foreach item,$(objs_to_link),
+		$(call Package/SwitchSet,$(item))
 		$(call Package/BeforeLink/$(item))
 	)
 	$(call Package/SwitchSet,$(tmp_cur_pkg_name))

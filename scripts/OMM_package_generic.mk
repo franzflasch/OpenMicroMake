@@ -1,8 +1,11 @@
 global_defines=$(patsubst %,-D%, $(GLOBAL_DEFS))
 
-cur_src=$(patsubst %,$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/%,$(PKG_SRC))
-cur_asm_src=$(patsubst %,$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/%,$(PKG_ASM_SRC))
+cur_src=$(filter %.c,$(patsubst %,$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/%,$(PKG_SRC)))
+cur_src_cpp=$(filter %.cpp,$(patsubst %,$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/%,$(PKG_SRC)))
+cur_asm_src=$(filter %.s,$(patsubst %,$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/%,$(PKG_SRC)))
+
 cur_objs=$(cur_src:.c=.o )
+cur_objs+=$(cur_src_cpp:.cpp=.o )
 cur_objs+=$(cur_asm_src:.s=.o )
 
 pkg_prepare_depends=$(patsubst %,$(OMM_PKG_WORK_DIR)/%/prepare,$(PKG_DEPS))
@@ -17,7 +20,6 @@ define Package/SetupPKGDefault
 	$(eval PKG_DEPS :=)	
 	$(eval PKG_URI := local)
 	$(eval PKG_SRC :=)
-	$(eval PKG_ASM_SRC :=)
 	$(eval PKG_INC :=)
 	$(eval PKG_DEFS :=)
 	$(eval PKG_CC_FLAGS :=)
@@ -31,7 +33,6 @@ define Package/SwitchSet
 	$(eval PKG_DEPS :=$($(1)/PKG_DEPS))
 	$(eval PKG_URI:=$($(1)/PKG_URI))
 	$(eval PKG_SRC:=$($(1)/PKG_SRC))
-	$(eval PKG_ASM_SRC:=$($(1)/PKG_ASM_SRC))
 	$(eval PKG_INC:=$($(1)/PKG_INC))
 	$(eval PKG_DEFS:=$($(1)/PKG_DEFS))
 	$(eval PKG_CC_FLAGS:=$($(1)/PKG_CC_FLAGS))
@@ -45,14 +46,13 @@ define Package/Setup
 	$(eval $(1)/PKG_DEPS :=$(PKG_DEPS))	
 	$(eval $(1)/PKG_URI := $(PKG_URI))
 	$(eval $(1)/PKG_SRC := $(PKG_SRC))
-	$(eval $(1)/PKG_ASM_SRC := $(PKG_ASM_SRC))
 	$(eval $(1)/PKG_INC := $(PKG_INC))
 	$(eval $(1)/PKG_DEFS := $(PKG_DEFS))
 	$(eval $(1)/PKG_CC_FLAGS := $(PKG_CC_FLAGS))
 	$(eval $(1)/PKG_PATCHES := $(PKG_PATCHES))
 	$(eval $(1)/PKG_BASEDIR := $(PKG_BASEDIR))
 	$(eval $(1)/PKG_REVISION := $(PKG_REVISION))
-	$(eval $(call Package/AddGlobalPackageList,$(PKG_NAME)))
+	$(call Package/AddGlobalPackageList,$(PKG_NAME))
 endef
 
 define Package/SetupPkgDeps

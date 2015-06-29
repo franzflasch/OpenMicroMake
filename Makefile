@@ -31,7 +31,6 @@ mk_files := $(call find_mk_files,$(OMM_PACKAGE_DIR))
 mk_files += $(call find_mk_files,$(PROJECT_PATH))
 $(eval $(call Package/IncludePKG,$(mk_files)))
 
-
 flash: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).hex
 	avrdude -cstk500v2 -P/dev/ttyUSB0 -patmega8 -Uflash:w:$(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).hex
 

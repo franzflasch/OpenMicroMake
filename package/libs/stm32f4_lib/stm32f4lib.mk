@@ -44,7 +44,7 @@ stm32f4xx_wwdg.c
 PKG_SRC := $(patsubst %,STM32F4xx_DSP_StdPeriph_Lib_V1.5.1/Libraries/STM32F4xx_StdPeriph_Driver/src/%,$(FILES))
 PKG_SRC += STM32F4xx_DSP_StdPeriph_Lib_V1.5.1/Project/STM32F4xx_StdPeriph_Templates/system_stm32f4xx.c
 
-PKG_ASM_SRC := STM32F4xx_DSP_StdPeriph_Lib_V1.5.1/Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc_ride7/startup_stm32f40_41xxx.s
+PKG_SRC += STM32F4xx_DSP_StdPeriph_Lib_V1.5.1/Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc_ride7/startup_stm32f40_41xxx.s
 
 PKG_INC := STM32F4xx_DSP_StdPeriph_Lib_V1.5.1/Libraries/STM32F4xx_StdPeriph_Driver/inc/
 PKG_INC += STM32F4xx_DSP_StdPeriph_Lib_V1.5.1/Libraries/CMSIS/Include/

@@ -19,13 +19,6 @@ $(eval tmp_prefix=$(subst $(tmp_space),-,$(tmp_prefix))) \
 PREFIX=$(tmp_prefix) $(MAKE) -C $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/libopencm3-$(PKG_REVISION)
 endef
 
-#define Package/Compile/$(PKG_NAME)
-#$(eval retval := $(shell cd $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/libopencm3-master; $(MAKE) > /dev/null; echo $$?)) \
-#$(if $(call strequal,$(retval),0),, \
-#	$(error Compiling of $(PKG_NAME) failed! retval $(retval)) \
-#)
-#endef
-
 define Package/BeforeLink/$(PKG_NAME)
 	$(if $(call strequal,$(MACH),stm32f1), \
 		$(eval LINKLIB := opencm3_stm32f1) \
@@ -48,6 +41,5 @@ $(eval tmp_prefix=$(strip $(tmp_prefix))) \
 $(eval tmp_prefix=$(subst $(tmp_space),-,$(tmp_prefix))) \
 PREFIX=$(tmp_prefix) $(MAKE) -C $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/libopencm3-$(PKG_REVISION) clean
 endef
-
 
 $(eval $(call Package/Setup,$(PKG_NAME)))
