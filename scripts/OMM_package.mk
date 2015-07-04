@@ -7,7 +7,7 @@ include scripts/functions/OMM_unpack.mk
 
 define Package/Download/$(PKG_NAME)
 	$(if $(strip $(PKG_URI)), \
-		$(call DownloadMethod/$(call dl_method,$(PKG_URI)),$(OMM_DOWNLOAD_DIR)/$(PKG_NAME),$(PKG_URI)) \
+		$(call DownloadMethod/$(call dl_method,$(PKG_URI)),$(OMM_DOWNLOAD_DIR)/$(PKG_NAME),$(PKG_URI),$(VERBOSE_OUTPUT)) \
 		, \
 		$(error No PKG_URI for $(PKG_NAME)) \
 	)
@@ -25,29 +25,23 @@ define Package/Patch/$(PKG_NAME)
 	$(if $(strip $(PKG_PATCHES)), \
 		$(eval tmp_omm_basedir:=$(PWD)) \
 		$(eval tmp_patches:=$(patsubst %,$(tmp_omm_basedir)/$(PKG_BASEDIR)%,$(PKG_PATCHES))) \
-		cd $(OMM_PKG_WORK_DIR)/$(PKG_NAME); \
-		quilt import $(tmp_patches); \
-		quilt push -a; \
-		cd $(tmp_omm_basedir); \
-		$(info $(tmp_patches)) \
+		$(call shell_with_exit_status,./scripts/functions/quilt_patch.sh "$(tmp_omm_basedir)" "$(OMM_PKG_WORK_DIR)/$(PKG_NAME)" "$(tmp_patches)",$(VERBOSE_OUTPUT))
 		, \
 	)
 endef
 
-#define Package/Info/$(PKG_NAME)
-#	$(info Package info:)
-#	$(info PKG_NAME $(PKG_NAME))
-#	$(info PKG_DEPS $(PKG_DEPS))
-#	$(info PKG_URI $(PKG_URI))
-#	$(info PKG_SRC $(PKG_SRC))
-#	$(info PKG_ASM_SRC $(PKG_ASM_SRC))
-#	$(info PKG_INC $(PKG_INC))
-#	$(info PKG_DEFS $(PKG_DEFS))
-#	$(info PKG_CC_FLAGS $(PKG_CC_FLAGS))
-#	$(info PKG_LD_FLAGS $(PKG_LD_FLAGS))
-#	$(info PKG_BASEDIR $(PKG_BASEDIR))
-#	$(info PKG_GLOBAL_DEFS $(PKG_GLOBAL_DEFS))
-#endef
+define Package/Info/$(PKG_NAME)
+	$(info Package info:)
+	$(info PKG_NAME = $(PKG_NAME))
+	$(info PKG_DEPS = $(PKG_DEPS))
+	$(info PKG_URI = $(PKG_URI))
+	$(info PKG_SRC = $(PKG_SRC))
+	$(info PKG_INC = $(PKG_INC))
+	$(info PKG_DEFS = $(PKG_DEFS))
+	$(info PKG_CC_FLAGS = $(PKG_CC_FLAGS))
+	$(info PKG_LD_FLAGS = $(PKG_LD_FLAGS))
+	$(info PKG_BASEDIR = $(PKG_BASEDIR))
+endef
 
 define Package/Compile/$(PKG_NAME)
 	$(eval tmp_inc_paths := $(patsubst %,-I%, $(pkg_inc_paths)))

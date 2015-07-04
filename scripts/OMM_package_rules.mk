@@ -1,5 +1,10 @@
 include scripts/OMM_package.mk
 
+$(PKG_NAME)/info:
+	$(call Package/SwitchSet,$(notdir $(@D)))
+	$(call Package/Info/$(PKG_NAME))
+	@echo [OMM_RULE] $(PKG_NAME)/info done 
+
 $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download:
 	$(call Package/SwitchSet,$(notdir $(@D)))
 	$(call Package/Download/$(PKG_NAME))
@@ -8,11 +13,11 @@ $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download:
 
 $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download $(call rwildcard, $(PKG_BASEDIR)/, *.s *.c *.cpp *.h)
 	$(call Package/SwitchSet,$(notdir $(@D)))
-	$(call Package/Info/$(PKG_NAME))
+	$(if $(call strequal,$(VERBOSE_OUTPUT),1),$(call Package/Info/$(PKG_NAME)),)
 	$(call Package/Unpack/$(PKG_NAME))
 	$(call Package/Patch/$(PKG_NAME))
 	$(call set_timestamp,$(OMM_PKG_WORK_DIR)/$(PKG_NAME),prepare)
-	@echo [OMM_RULE] $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare done
+	@echo [OMM_RULE] $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare done	
 
 $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/compile: $(pkg_compile_depends) $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare $(cur_src)
 	$(call Package/SwitchSet,$(notdir $(@D)))
@@ -26,7 +31,7 @@ $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/compile
 	$(call Package/SwitchSet,$(notdir $(@D)))
 	$(call Package/Link/$(PKG_NAME))
 	$(call set_timestamp,$(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME),link)
-	@echo $[OMM_RULE] $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link done
+	@echo [OMM_RULE] $[OMM_RULE] $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link done
 
 $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).bin: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME)/link
 	$(CP) -O binary -S $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).elf $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).bin
@@ -55,6 +60,8 @@ $(PKG_NAME)/dirclean: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/dirclean
 
 .PHONY: \
 $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/clean \
+$(OMM_PKG_WORK_DIR)/$(PKG_NAME)/dirclean \
+$(PKG_NAME)/info \
 $(PKG_NAME)/download \
 $(PKG_NAME)/prepare \
 $(PKG_NAME)/compile \

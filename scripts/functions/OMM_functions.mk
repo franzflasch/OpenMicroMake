@@ -46,7 +46,16 @@ endef
 # 			$2: debug 1, 0
 define shell_with_exit_status
 $(if $(strip $(3)),$(error no option to redirect!)) \
-$(if $(call strequal,$(2),1),$(info $(1))$(eval retval := $(shell $(1); echo $$?)), \
-$(eval retval := $(shell $(1) 2> /dev/null; echo $$?))) \
-$(if $(call strequal,$(retval),0),,$(error $(1) failed! retval $(retval)))
+$(if $(call strequal,$(2),1), \
+	$(info $(1)) \
+	$(info $(shell_output))
+	$(eval shell_output := $(shell $(1); echo exitstatus $$?)) \
+	$(eval exitstatus := $(lastword $(shell_output))) \
+	, \
+	$(eval shell_output := $(shell $(1) 2> /dev/null; echo exitstatus $$?)) \
+	$(eval exitstatus := $(lastword $(shell_output))) \
+) \
+$(if $(call strequal,$(exitstatus),0),, \
+	$(error $(1) failed! exitstatus $(exitstatus)) \
+)
 endef

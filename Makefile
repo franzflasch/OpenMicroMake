@@ -1,26 +1,3 @@
-ifeq ($(strip $(PROJECT)),)
-$(error no project config given...)
-else
-include $(PROJECT)
-endif
-
-ifeq ($(strip $(ARCH)),)
-$(error ARCH not defined!)
-endif
-
-ifeq ($(strip $(MACH)),)
-$(error MACH not defined!)
-endif
-
-ifeq ($(strip $(CCPREFIX)),)
-$(error CCPREFIX not defined!)
-endif
-
-PROJECT_NAME=$(basename $(notdir $(PROJECT)))
-PROJECT_PATH=$(dir $(PROJECT))
-
-VERBOSE_OUTPUT := 1
-
 include scripts/OMM_config.mk
 include scripts/functions/OMM_functions.mk
 include scripts/OMM_package_generic.mk

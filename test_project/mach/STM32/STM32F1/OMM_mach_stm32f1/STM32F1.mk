@@ -1,7 +1,7 @@
 PKG_NAME := mach_stm32f1
 
 ifeq ($(UCLIB),st_library)
-PKG_DEPS := stm32f4lib
+PKG_DEPS := stm32f1lib
 PKG_SRC := src/OMM_mach_stm32f1.c
 endif
 

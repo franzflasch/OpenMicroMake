@@ -27,6 +27,6 @@ git clone $2 $3
 endef
 
 define DownloadMethod/default
-$(call shell_with_exit_status,mkdir --parents $(1),$(VERBOSE_OUTPUT)) \
-$(call shell_with_exit_status,wget -nc -P $1 $2,$(VERBOSE_OUTPUT))
+$(call shell_with_exit_status,mkdir --parents $(1),$(3)) \
+$(call shell_with_exit_status,wget -nc -P $1 $2,$(3))
 endef
