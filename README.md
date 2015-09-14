@@ -24,7 +24,7 @@ defines the dependencies and sources of your own project.
 
 # Supported Microcontrollers
 The OpenMicroMake buildframework can basically used for every microcontroller. 
-However the test_project only supports the stm32f4discovery, the olimex stm32h103, the atmega8 and the atmega168.
+However the test_project only supports the stm32f4discovery, the stm32f3discovery the olimex stm32h103, the atmega8 and the atmega168.
 
 # Just to mention...
 This project uses external libraries such as libopencm3, st standard peripheral library, etc. for building.
