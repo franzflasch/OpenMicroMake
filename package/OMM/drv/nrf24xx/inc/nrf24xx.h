@@ -27,32 +27,46 @@
 #ifndef NRF24XX_H
 #define NRF24XX_H
 
-#ifdef __KERNEL__
-#include <linux/types.h>
-#else
 #include <stdint.h>
-#endif
-
-/* Settings */
-#define NRF24_MESSAGE_LEN 16
-#define NRF24_DEFAULT_CHANNEL 2
-/* NOTE: this should be an even number - otherwise the nrf24l01 or this software doesn't work properly ;)*/
-#define NRF24_NR_TX_MESSAGES 1
-#define NRF24_USED_RX_TX_DELAY 100
-
-#define NRF24_READ_REQ 0
-#define NRF24_WRITE_REQ 1
-
-#define NRF_RETURN_STATUS_OK 0
-#define NRF_RETURN_STATUS_ERROR 1
-#define NRF_RETURN_STATUS_NO_DATA 2
-
-#define NRF24_MAX_FAILED_COUNTER 15
 
 /* LOWLEVEL */
-#define NRF24_TRANSMISSON_OK 0
-#define NRF24_MESSAGE_LOST   1
+#define NRF24_TRANSMISSON_OK	0
+#define NRF24_MESSAGE_LOST   	1
+#define NRF24_INVALID_ARGUMENT	2
+
+
 #define NRF24_SPI_MSG_MAX_LEN 32
+#define NRF24_PAYLOAD_LEN 16
+
+#define NRF24_ADDR_LEN 5
+
+#define NRF24_MAX_RETRIES 50
+
+#define NRF24_NR_TX_MESSAGES 2
+#define NRF24_NR_RX_MESSAGES 2
+
+#if (NRF24_ADDR_LEN>NRF24_PAYLOAD_LEN)
+#error INVALID NRF24 Msg payload length!
+#endif
+
+#define NRF24_BUFFER_PAYLOAD_LEN (NRF24_PAYLOAD_LEN-NRF24_ADDR_LEN-3)
+
+typedef struct nrf24xx_msg_s
+{
+	uint8_t addr_from[NRF24_ADDR_LEN];
+	uint8_t payload_size;
+	uint8_t msg_id;
+	uint8_t rx_req;
+	uint8_t msg_buffer[NRF24_BUFFER_PAYLOAD_LEN];
+
+} nrf24xx_msg_t;
+
+typedef union nrf24xx_msg_union_s
+{
+	uint8_t raw[NRF24_PAYLOAD_LEN];
+	nrf24xx_msg_t msg;
+
+} nrf24xx_msg_union_t;
 
 typedef struct nrf24xx_s
 {
@@ -78,30 +92,29 @@ typedef struct nrf24xx_s
 
 }nrf24xx_t;
 
-void nrf24_init(nrf24xx_t *nrf24,
-				void *nrf24_spi,
-				void *spi_transfer_byte,
-				void *spi_transfer_msg,
-				void *nrf24xx_set_ce,
-				void *nrf24_delay_func);
+void nrf24_drv_init(nrf24xx_t *nrf24,
+					void *nrf24_spi,
+					void *spi_transfer_byte,
+					void *spi_transfer_msg,
+					void *nrf24xx_set_ce,
+					void *nrf24_delay_func);
 void nrf24_config(nrf24xx_t *nrf24, uint8_t channel, uint8_t pay_length);
-void nrf24_powerUpRx(nrf24xx_t *nrf24);
-void nrf24_powerUpTx(nrf24xx_t *nrf24);
-void nrf24_powerDown(nrf24xx_t *nrf24);
+void nrf24_power_up_rx(nrf24xx_t *nrf24);
+void nrf24_power_up_tx(nrf24xx_t *nrf24);
+void nrf24_power_down(nrf24xx_t *nrf24);
 void nrf24_rx_address(nrf24xx_t *nrf24, uint8_t * adr);
 void nrf24_tx_address(nrf24xx_t *nrf24, uint8_t* adr);
-uint8_t nrf24_dataReady(nrf24xx_t *nrf24);
-uint8_t nrf24_rxFifoEmpty(nrf24xx_t *nrf24);
-uint8_t nrf24_payloadLength(nrf24xx_t *nrf24);
-void nrf24_getData(nrf24xx_t *nrf24, uint8_t* data);
-uint8_t nrf24_retransmissionCount(nrf24xx_t *nrf24);
+uint8_t nrf24_data_ready(nrf24xx_t *nrf24);
+void nrf24_get_data(nrf24xx_t *nrf24, uint8_t* data);
 void nrf24_send(nrf24xx_t *nrf24, uint8_t* value);
-uint8_t nrf24_isSending(nrf24xx_t *nrf24);
-uint8_t nrf24_getStatus(nrf24xx_t *nrf24);
-uint8_t nrf24_lastMessageStatus(nrf24xx_t *nrf24);
+uint8_t nrf24_is_sending(nrf24xx_t *nrf24);
+uint8_t nrf24_get_status(nrf24xx_t *nrf24);
+uint8_t nrf24_last_message_status(nrf24xx_t *nrf24);
+void nrf24_clear_irqs(nrf24xx_t *nrf24);
+int8_t nrf24_master_ping_pong(nrf24xx_t *nrf24, uint8_t *txaddress, uint8_t *rxaddress, uint8_t *buf_tx, uint8_t *buf_rx, uint8_t buf_size, uint8_t rx_req);
+int8_t nrf24_slave_ping_pong(nrf24xx_t *nrf24, uint8_t *rx_address, uint8_t *buf_tx, uint8_t *buf_rx, uint8_t buf_size);
 
-int8_t NRF24XX_master_send_message(nrf24xx_t *nrf24, uint8_t channel, uint8_t* own_addr, uint8_t* tx_addr, uint8_t *msg, uint16_t len);
-int8_t NRF24XX_master_receive_message(nrf24xx_t *nrf24, uint8_t channel, uint8_t* own_addr, uint8_t* tx_addr, uint8_t *msg, uint16_t len);
-int8_t NRF24XX_slave_handler(nrf24xx_t *nrf24, uint8_t channel, uint8_t* own_addr, uint8_t *tx_addr);
+int8_t nrf24_master_ping_pongs(nrf24xx_t *nrf24, uint8_t *txaddress, uint8_t *rxaddress, uint8_t *buf, uint8_t buf_size);
+int8_t nrf24_slave_ping_pongs(nrf24xx_t *nrf24, uint8_t *rx_address, uint8_t *buf);
 
 #endif

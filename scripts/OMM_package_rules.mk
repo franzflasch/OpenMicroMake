@@ -47,7 +47,7 @@ $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/clean:
 $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/dirclean:
 	$(call Package/SwitchSet,$(notdir $(@D)))
 	$(call Package/Dirclean/$(PKG_NAME))
-
+	
 #### Shortcut rules:
 $(PKG_NAME)/download: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/download
 $(PKG_NAME)/prepare: $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/prepare

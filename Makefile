@@ -13,5 +13,8 @@ flash: $(OMM_PKG_DEPLOY_DIR)/$(PKG_NAME).hex
 
 test:
 	@echo test
+	
+clean:
+	rm -rf $(OMM_WORK_DIR)/$(PROJECT_NAME)
 
-.PHONY: all test flash
+.PHONY: all test flash clean
