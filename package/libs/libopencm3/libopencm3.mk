@@ -25,6 +25,11 @@ define Package/BeforeLink/$(PKG_NAME)
 		$(eval LINKERSCRIPT := $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/stm32f1-discovery.ld) \
 		, \
 	) \
+	$(if $(call strequal,$(MACH),stm32f3), \
+		$(eval LINKLIB := opencm3_stm32f3) \
+		$(eval LINKERSCRIPT := $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/stm32f3-discovery.ld) \
+		, \
+	) \
 	$(if $(call strequal,$(MACH),stm32f40x), \
 		$(eval LINKLIB := opencm3_stm32f4) \
 		$(eval LINKERSCRIPT := $(OMM_PKG_WORK_DIR)/$(PKG_NAME)/stm32f4-discovery.ld) \

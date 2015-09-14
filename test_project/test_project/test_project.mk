@@ -14,6 +14,11 @@ PKG_DEPS += mach_stm32f4
 PKG_DEPS += mach_stm32_common
 endif
 
+ifeq ($(MACH),stm32f3)
+PKG_DEPS += mach_stm32f3
+PKG_DEPS += mach_stm32_common
+endif
+
 ifeq ($(MACH),atmega8)
 PKG_DEPS += mach_atmega8
 PKG_DEPS += mach_avr_common
